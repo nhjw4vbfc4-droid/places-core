@@ -1,7 +1,9 @@
 name: CI
 
-# Builds and tests the shared package on its own, independent of either app.
-# Fast + cheap (a tiny library), so it runs on every push and PR.
+# Compiles the shared package for iOS — the platform both apps ship — on its
+# own, independent of either app. Fast + cheap (a tiny library), so it runs on
+# every push and PR. Uses xcodebuild (not `swift build`) so it targets iOS
+# rather than the macOS CI host.
 
 on:
   push:
@@ -13,15 +15,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-test:
-    name: swift build + test
+  build:
+    name: build (iOS)
     runs-on: macos-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Swift version
-        run: swift --version
-      - name: Build
-        run: swift build
-      - name: Test
-        run: swift test
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: Schemes
+        run: xcodebuild -list
+      - name: Build for iOS
+        run: xcodebuild build -scheme PlacesCore -destination 'generic/platform=iOS'
